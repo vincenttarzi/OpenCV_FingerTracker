@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import time
+import mouse
 
 hand_hist = None
 traverse_point = []
@@ -10,8 +12,18 @@ hand_rect_one_y = None
 hand_rect_two_x = None
 hand_rect_two_y = None
 
+display_width = 1920
+display_height = 1080
 
-def rescale_frame(frame, wpercent=130, hpercent=130):
+prev_x = None
+prev_y = None
+
+wpercent = 100
+hpercent = 100
+
+firstRun = True
+
+def rescale_frame(frame, wpercent, hpercent):
     width = int(frame.shape[1] * wpercent / 100)
     height = int(frame.shape[0] * hpercent / 100)
     return cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
@@ -115,7 +127,11 @@ def draw_circles(frame, traverse_point):
             cv2.circle(frame, traverse_point[i], int(5 - (5 * i * 3) / 100), [0, 255, 255], -1)
 
 
+def distance(x1,y1,x2,y2):
+    return ((x1 - x2)**2 + (y1 - y2)**2)**0.5
+
 def manage_image_opr(frame, hand_hist):
+    global firstRun, prev_x, prev_y
     hist_mask_image = hist_masking(frame, hand_hist)
 
     hist_mask_image = cv2.erode(hist_mask_image, None, iterations=2)
@@ -127,19 +143,51 @@ def manage_image_opr(frame, hand_hist):
     cnt_centroid = centroid(max_cont)
     cv2.circle(frame, cnt_centroid, 5, [255, 0, 255], -1)
 
+    x_pad_hi = int(frame.shape[1] * wpercent / 100)
+    x_pad_lo = x_pad_hi / 5
+    x_pad_hi = x_pad_hi - x_pad_lo
+    y_pad_hi = int(frame.shape[0] * wpercent / 100)
+    y_pad_lo = y_pad_hi / 3
+    y_pad_hi = y_pad_hi - y_pad_lo
+
     if max_cont is not None:
         hull = cv2.convexHull(max_cont, returnPoints=False)
         defects = cv2.convexityDefects(max_cont, hull)
         far_point = farthest_point(defects, max_cont, cnt_centroid)
-        print("Centroid : " + str(cnt_centroid) + ", farthest Point : " + str(far_point))
-        cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
-        if len(traverse_point) < 20:
-            traverse_point.append(far_point)
-        else:
-            traverse_point.pop(0)
-            traverse_point.append(far_point)
+        if(firstRun == True):
+            print("HERERERERER")
+            firstRun = False
+            prev_x = far_point[0]
+            prev_y = far_point[1]
 
-        draw_circles(frame, traverse_point)
+        if(distance(far_point[0], far_point[1], prev_x, prev_y) < x_pad_lo):
+        # far_point = list(far_point)
+
+        # far_point[0] = np.clip(far_point[0], x_pad_lo, x_pad_hi)
+        # far_point[1] = np.clip(far_point[1], y_pad_lo, y_pad_hi)
+
+        # far_point = tuple(far_point)
+
+            prev_x = far_point[0]
+            prev_y = far_point[1]
+
+            mouse_x = far_point[0] - x_pad_lo
+            mouse_y = far_point[1] - y_pad_lo
+
+            # print("X Lo: " + str(x_pad_lo) + ", X Hi: " + str(x_pad_hi) + ", Y Lo: " + str(y_pad_lo) + ", Y Hi: " + str(y_pad_hi))
+            # print("Mouse X: " + str(mouse_x) + "Mouse Y: " + str(mouse_y))
+            
+            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)), duration=0.04)
+            
+            # print("Centroid : " + str(cnt_centroid) + ", farthest Point : " + str(far_point))
+            cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
+            if len(traverse_point) < 20:
+                traverse_point.append(far_point)
+            else:
+                traverse_point.pop(0)
+                traverse_point.append(far_point)
+
+            draw_circles(frame, traverse_point)
 
 
 def main():
@@ -162,7 +210,7 @@ def main():
         else:
             frame = draw_rect(frame)
 
-        cv2.imshow("Live Feed", rescale_frame(frame))
+        cv2.imshow("Live Feed", rescale_frame(frame, wpercent, hpercent))
 
         if pressed_key == 27:
             break
