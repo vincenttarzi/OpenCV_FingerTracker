@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import time
 import mouse
+import HandTracker as htm
 
 hand_hist = None
 traverse_point = []
@@ -153,41 +154,41 @@ def manage_image_opr(frame, hand_hist):
     if max_cont is not None:
         hull = cv2.convexHull(max_cont, returnPoints=False)
         defects = cv2.convexityDefects(max_cont, hull)
-        far_point = farthest_point(defects, max_cont, cnt_centroid)
+        # far_point = farthest_point(defects, max_cont, cnt_centroid)
         if(firstRun == True):
-            print("HERERERERER")
             firstRun = False
-            prev_x = far_point[0]
-            prev_y = far_point[1]
+            prev_x = cnt_centroid[0]
+            prev_y = cnt_centroid[1]
 
-        if(distance(far_point[0], far_point[1], prev_x, prev_y) < x_pad_lo):
-        # far_point = list(far_point)
+        if(distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) < x_pad_lo
+            and (distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) > x_pad_lo / 50)):
+        # cnt_centroid = list(cnt_centroid)
 
-        # far_point[0] = np.clip(far_point[0], x_pad_lo, x_pad_hi)
-        # far_point[1] = np.clip(far_point[1], y_pad_lo, y_pad_hi)
+        # cnt_centroid[0] = np.clip(cnt_centroid[0], x_pad_lo, x_pad_hi)
+        # cnt_centroid[1] = np.clip(cnt_centroid[1], y_pad_lo, y_pad_hi)
 
-        # far_point = tuple(far_point)
+        # cnt_centroid = tuple(cnt_centroid)
 
-            prev_x = far_point[0]
-            prev_y = far_point[1]
+            prev_x = cnt_centroid[0]
+            prev_y = cnt_centroid[1]
 
-            mouse_x = far_point[0] - x_pad_lo
-            mouse_y = far_point[1] - y_pad_lo
+            mouse_x = cnt_centroid[0] - x_pad_lo
+            mouse_y = cnt_centroid[1] - y_pad_lo
 
             # print("X Lo: " + str(x_pad_lo) + ", X Hi: " + str(x_pad_hi) + ", Y Lo: " + str(y_pad_lo) + ", Y Hi: " + str(y_pad_hi))
             # print("Mouse X: " + str(mouse_x) + "Mouse Y: " + str(mouse_y))
             
-            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)), duration=0.04)
-            
+            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)), duration = 0.015)
+            # mouse.move(cnt_centroid[0], cnt_centroid[1])
             # print("Centroid : " + str(cnt_centroid) + ", farthest Point : " + str(far_point))
-            cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
-            if len(traverse_point) < 20:
-                traverse_point.append(far_point)
-            else:
-                traverse_point.pop(0)
-                traverse_point.append(far_point)
+            # cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
+            # if len(traverse_point) < 20:
+            #     traverse_point.append(far_point)
+            # else:
+            #     traverse_point.pop(0)
+            #     traverse_point.append(far_point)
 
-            draw_circles(frame, traverse_point)
+            # draw_circles(frame, traverse_point)
 
 
 def main():
@@ -195,10 +196,16 @@ def main():
     is_hand_hist_created = False
     capture = cv2.VideoCapture(0)
 
+    detector = htm.handDetector(detectionCon=0.75)
+    tipIds = [4, 8, 12, 16, 20]
+
     while capture.isOpened():
         pressed_key = cv2.waitKey(1)
         _, frame = capture.read()
         frame = cv2.flip(frame, 1)
+
+        img = detector.findHands(frame)
+        lmList = detector.findPosition(img, draw=False)
 
         if pressed_key & 0xFF == ord('z'):
             is_hand_hist_created = True
@@ -206,6 +213,32 @@ def main():
 
         if is_hand_hist_created:
             manage_image_opr(frame, hand_hist)
+            if len(lmList) != 0:
+                fingers = []
+
+                # Thumb
+                if lmList[tipIds[0]][1] < lmList[tipIds[0] - 1][1]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+
+                # 4 Fingers
+                for id in range(1, 5):
+                    if lmList[tipIds[id]][2] < lmList[tipIds[id] - 2][2]:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+
+                # print(fingers)
+                totalFingers = fingers.count(1)
+                print(totalFingers)
+
+                # h, w, c = overlayList[totalFingers - 1].shape
+                # img[0:h, 0:w] = overlayList[totalFingers - 1]
+
+                cv2.rectangle(img, (20, 225), (170, 425), (0, 255, 0), cv2.FILLED)
+                cv2.putText(img, str(totalFingers), (45, 375), cv2.FONT_HERSHEY_PLAIN,
+                            10, (255, 0, 0), 25)
 
         else:
             frame = draw_rect(frame)
