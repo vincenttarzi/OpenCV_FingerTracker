@@ -212,7 +212,7 @@ def manage_image_opr(frame, hand_hist):
             mouse_x = cnt_centroid[0] - x_pad_lo
             mouse_y = cnt_centroid[1] - y_pad_lo
 
-            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)), duration = 0.0)
+            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)))
 
 
 def main():
