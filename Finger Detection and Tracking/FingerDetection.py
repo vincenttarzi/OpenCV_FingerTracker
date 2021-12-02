@@ -24,6 +24,13 @@ hpercent = 100
 
 firstRun = True
 
+f = [False, False, False, False, False, False]
+
+lmb_start = 0
+rmb_start = 0
+scrUp_start = 0
+scrDown_start = 0
+
 def rescale_frame(frame, wpercent, hpercent):
     width = int(frame.shape[1] * wpercent / 100)
     height = int(frame.shape[0] * hpercent / 100)
@@ -132,7 +139,7 @@ def distance(x1,y1,x2,y2):
     return ((x1 - x2)**2 + (y1 - y2)**2)**0.5
 
 def manage_image_opr(frame, hand_hist):
-    global firstRun, prev_x, prev_y
+    global firstRun, prev_x, prev_y, f, lmb_start, rmb_start, scrUp_start, scrDown_start
     hist_mask_image = hist_masking(frame, hand_hist)
 
     hist_mask_image = cv2.erode(hist_mask_image, None, iterations=2)
@@ -151,23 +158,53 @@ def manage_image_opr(frame, hand_hist):
     y_pad_lo = y_pad_hi / 3
     y_pad_hi = y_pad_hi - y_pad_lo
 
+
     if max_cont is not None:
         hull = cv2.convexHull(max_cont, returnPoints=False)
         defects = cv2.convexityDefects(max_cont, hull)
-        # far_point = farthest_point(defects, max_cont, cnt_centroid)
         if(firstRun == True):
             firstRun = False
             prev_x = cnt_centroid[0]
             prev_y = cnt_centroid[1]
 
+        if(f[1] == True):
+            if(lmb_start == 0):
+                lmb_start = time.time()
+            if(time.time() - lmb_start >= 1):
+                mouse.click('left')
+                lmb_start = 0
+        else:
+            lmb_start = 0
+
+        if(f[2] == True):
+            if(rmb_start == 0):
+                rmb_start = time.time()
+            if(time.time() - rmb_start >= 1):
+                mouse.click('right')
+                rmb_start = 0
+        else:
+            rmb_start = 0
+
+        if(f[4] == True):
+            if(scrUp_start == 0):
+                scrUp_start = time.time()
+            if(time.time() - scrUp_start >= 0.2):
+                mouse.wheel(1)
+                scrUp_start = 0
+        else:
+            scrUp_start = 0
+
+        if(f[5] == True):
+            if(scrDown_start == 0):
+                scrDown_start = time.time()
+            if(time.time() - scrDown_start >= 0.2):
+                mouse.wheel(-1)
+                scrDown_start = 0
+        else:
+            scrDown_start = 0
+
         if(distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) < x_pad_lo
             and (distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) > x_pad_lo / 50)):
-        # cnt_centroid = list(cnt_centroid)
-
-        # cnt_centroid[0] = np.clip(cnt_centroid[0], x_pad_lo, x_pad_hi)
-        # cnt_centroid[1] = np.clip(cnt_centroid[1], y_pad_lo, y_pad_hi)
-
-        # cnt_centroid = tuple(cnt_centroid)
 
             prev_x = cnt_centroid[0]
             prev_y = cnt_centroid[1]
@@ -175,24 +212,11 @@ def manage_image_opr(frame, hand_hist):
             mouse_x = cnt_centroid[0] - x_pad_lo
             mouse_y = cnt_centroid[1] - y_pad_lo
 
-            # print("X Lo: " + str(x_pad_lo) + ", X Hi: " + str(x_pad_hi) + ", Y Lo: " + str(y_pad_lo) + ", Y Hi: " + str(y_pad_hi))
-            # print("Mouse X: " + str(mouse_x) + "Mouse Y: " + str(mouse_y))
-            
-            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)), duration = 0.015)
-            # mouse.move(cnt_centroid[0], cnt_centroid[1])
-            # print("Centroid : " + str(cnt_centroid) + ", farthest Point : " + str(far_point))
-            # cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
-            # if len(traverse_point) < 20:
-            #     traverse_point.append(far_point)
-            # else:
-            #     traverse_point.pop(0)
-            #     traverse_point.append(far_point)
-
-            # draw_circles(frame, traverse_point)
+            mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)), duration = 0.0)
 
 
 def main():
-    global hand_hist
+    global hand_hist, f
     is_hand_hist_created = False
     capture = cv2.VideoCapture(0)
 
@@ -229,16 +253,12 @@ def main():
                     else:
                         fingers.append(0)
 
-                # print(fingers)
                 totalFingers = fingers.count(1)
-                print(totalFingers)
-
-                # h, w, c = overlayList[totalFingers - 1].shape
-                # img[0:h, 0:w] = overlayList[totalFingers - 1]
-
-                cv2.rectangle(img, (20, 225), (170, 425), (0, 255, 0), cv2.FILLED)
-                cv2.putText(img, str(totalFingers), (45, 375), cv2.FONT_HERSHEY_PLAIN,
-                            10, (255, 0, 0), 25)
+                for i in range(0,6):
+                    if(totalFingers == i):
+                        f[i] = True
+                    else:
+                        f[i] = False
 
         else:
             frame = draw_rect(frame)
