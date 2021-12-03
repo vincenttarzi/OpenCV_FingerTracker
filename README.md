@@ -21,6 +21,8 @@ To use this application:
     
  To exit the program, press escape, or close out of the shell you are using by making a one finger gesture on the close window button!
  
+ DEMO: https://drive.google.com/file/d/1d9jvwYnqnIQZjXOHTQOAFccT8WzGtJ5E/view?usp=sharing
+ 
  NOTES:
   - Making fine mouse movements with this program is difficult, as the center of mass of the hand histogram will always have some wiggle. It is recommended to use this in applications where the user wants to move the mouse to act as a pointer in general areas, as well as make simple mouse gestures (e.g. a PowerPoint presentation)
   - Parameters that can be tuned:
