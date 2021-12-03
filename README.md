@@ -1,4 +1,4 @@
-# OpenCV_FingerTracker
+# Real-Time Hand Tracking and Gesture Detection with Python
 
 This project utilizes Python OpenCV and Python Mouse libraries to create a real-time hand/finger tracker using the user's default webcam.
 
