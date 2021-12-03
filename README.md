@@ -5,7 +5,7 @@ This project utilizes Python OpenCV and Python Mouse libraries to create a real-
 To use this application:
   1. Navigate to the "Finger Tracking and Detection" directory
   2. Run the script with "python FingerDetection.py"
-  3. Place your hand in front of the camera such that your open palm covers all 9 green rectangles (this is essential for correctly separating your hand from the background)
+  3. Place your hand in front of the camera so that you can see a segmented hand with green lines and red dots
   4. Press "z"
   
  Now that the application is running, you will be able to move your mouse around by just using your hand.
@@ -26,7 +26,7 @@ To use this application:
  </p>
 
  NOTES:
-  - Making fine mouse movements with this program is difficult, as the center of mass of the hand histogram will always have some wiggle. It is recommended to use this in applications where the user wants to move the mouse to act as a pointer in general areas, as well as make simple mouse gestures (e.g. a PowerPoint presentation)
+  - Making fine mouse movements with this program is difficult, as the center of mass of the hand will always have some wiggle. It is recommended to use this in applications where the user wants to move the mouse to act as a pointer in general areas, as well as make simple mouse gestures (e.g. a PowerPoint presentation)
   - Parameters that can be tuned:
     
     - mouse.move duration can be increased or decreased. Increasing this will cause the program to slow down but make fewer mouse movements. Decreasing this will cause more jitter.
