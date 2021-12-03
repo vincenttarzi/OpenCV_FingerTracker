@@ -20,7 +20,11 @@ To use this application:
     - Five fingers: When held up, the mouse will scroll down
     
  To exit the program, press escape, or close out of the shell you are using by making a one finger gesture on the close window button!
- 
+
+ <p align="center">
+ <iframe width="560" height="315" src="https://www.youtube.com/embed/HXIvjrr82yw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+ </p>
+
  NOTES:
   - Making fine mouse movements with this program is difficult, as the center of mass of the hand histogram will always have some wiggle. It is recommended to use this in applications where the user wants to move the mouse to act as a pointer in general areas, as well as make simple mouse gestures (e.g. a PowerPoint presentation)
   - Parameters that can be tuned:
