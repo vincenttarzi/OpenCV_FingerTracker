@@ -140,16 +140,16 @@ def distance(x1,y1,x2,y2):
 
 def manage_image_opr(frame, hand_hist, handPoints):
     global firstRun, prev_x, prev_y, f, lmb_start, rmb_start, scrUp_start, scrDown_start
-    hist_mask_image = hist_masking(frame, hand_hist)
+    # hist_mask_image = hist_masking(frame, hand_hist)
 
-    hist_mask_image = cv2.erode(hist_mask_image, None, iterations=2)
-    hist_mask_image = cv2.dilate(hist_mask_image, None, iterations=2)
+    # hist_mask_image = cv2.erode(hist_mask_image, None, iterations=2)
+    # hist_mask_image = cv2.dilate(hist_mask_image, None, iterations=2)
 
-    contour_list = contours(hist_mask_image)
-    max_cont = max(contour_list, key=cv2.contourArea)
+    # contour_list = contours(hist_mask_image)
+    # max_cont = max(contour_list, key=cv2.contourArea)
 
-    cnt_centroid = centroid(max_cont)
-    cv2.circle(frame, cnt_centroid, 5, [255, 0, 255], -1)
+    # cnt_centroid = centroid(max_cont)
+    # cv2.circle(frame, cnt_centroid, 5, [255, 0, 255], -1)
 
     x_pad_hi = int(frame.shape[1] * wpercent / 100)
     x_pad_lo = x_pad_hi / 5
@@ -159,66 +159,67 @@ def manage_image_opr(frame, hand_hist, handPoints):
     y_pad_hi = y_pad_hi - y_pad_lo
 
 
-    if max_cont is not None:
-        hull = cv2.convexHull(max_cont, returnPoints=False)
-        defects = cv2.convexityDefects(max_cont, hull)
-        if(firstRun == True):
-            firstRun = False
-            # prev_x = cnt_centroid[0]
-            # prev_y = cnt_centroid[1]
-            centerX = handPoints[0][1] + handPoints[1][1] + handPoints[17][1]
-            centerX /= 3
-            centerY = handPoints[0][2] + handPoints[1][2] + handPoints[17][2]
-            centerY /= 3
-            prev_x = centerX
-            prev_y = centerY
+    # if max_cont is not None:
+        # hull = cv2.convexHull(max_cont, returnPoints=False)
+        # defects = cv2.convexityDefects(max_cont, hull)
+    if(firstRun == True):
+        firstRun = False
+        # prev_x = cnt_centroid[0]
+        # prev_y = cnt_centroid[1]
+        centerX = handPoints[0][1] + handPoints[1][1] + handPoints[17][1]
+        centerX /= 3
+        centerY = handPoints[0][2] + handPoints[1][2] + handPoints[17][2]
+        centerY /= 3
+        prev_x = centerX
+        prev_y = centerY
 
-        if(f[1] == True):
-            if(lmb_start == 0):
-                lmb_start = time.time()
-            if(time.time() - lmb_start >= 1):
-                mouse.click('left')
-                lmb_start = 0
-        else:
+    if(f[1] == True):
+        if(lmb_start == 0):
+            lmb_start = time.time()
+        if(time.time() - lmb_start >= 1):
+            mouse.click('left')
             lmb_start = 0
+    else:
+        lmb_start = 0
 
-        if(f[2] == True):
-            if(rmb_start == 0):
-                rmb_start = time.time()
-            if(time.time() - rmb_start >= 1):
-                mouse.click('right')
-                rmb_start = 0
-        else:
+    if(f[2] == True):
+        if(rmb_start == 0):
+            rmb_start = time.time()
+        if(time.time() - rmb_start >= 1):
+            mouse.click('right')
             rmb_start = 0
+    else:
+        rmb_start = 0
 
-        if(f[4] == True):
-            if(scrUp_start == 0):
-                scrUp_start = time.time()
-            if(time.time() - scrUp_start >= 0.2):
-                mouse.wheel(1)
-                scrUp_start = 0
-        else:
+    if(f[4] == True):
+        if(scrUp_start == 0):
+            scrUp_start = time.time()
+        if(time.time() - scrUp_start >= 0.2):
+            mouse.wheel(1)
             scrUp_start = 0
+    else:
+        scrUp_start = 0
 
-        if(f[5] == True):
-            if(scrDown_start == 0):
-                scrDown_start = time.time()
-            if(time.time() - scrDown_start >= 0.2):
-                mouse.wheel(-1)
-                scrDown_start = 0
-        else:
+    if(f[5] == True):
+        if(scrDown_start == 0):
+            scrDown_start = time.time()
+        if(time.time() - scrDown_start >= 0.2):
+            mouse.wheel(-1)
             scrDown_start = 0
+    else:
+        scrDown_start = 0
 
-        # if(distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) < x_pad_lo
-        #     and (distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) > x_pad_lo / 50)):
-        #
-        #     prev_x = cnt_centroid[0]
-        #     prev_y = cnt_centroid[1]
-        #
-        #     mouse_x = cnt_centroid[0] - x_pad_lo
-        #     mouse_y = cnt_centroid[1] - y_pad_lo
-        #
-        #     mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)))
+    # if(distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) < x_pad_lo
+    #     and (distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) > x_pad_lo / 50)):
+    #
+    #     prev_x = cnt_centroid[0]
+    #     prev_y = cnt_centroid[1]
+    #
+    #     mouse_x = cnt_centroid[0] - x_pad_lo
+    #     mouse_y = cnt_centroid[1] - y_pad_lo
+    #
+    #     mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)))
+    try:
         centerX = handPoints[0][1] + handPoints[1][1] + handPoints[17][1]
         centerX /= 3
         centerY = handPoints[0][2] + handPoints[1][2] + handPoints[17][2]
@@ -230,6 +231,8 @@ def manage_image_opr(frame, hand_hist, handPoints):
             mouse_x = centerX - x_pad_lo
             mouse_y = centerY - y_pad_lo
             mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)))
+    except IndexError:
+        pass
 
 
 def main():
@@ -249,8 +252,8 @@ def main():
         lmList = detector.findPosition(img, draw=False)
 
         if pressed_key & 0xFF == ord('z'):
+            # Remnant from the histogram approach
             is_hand_hist_created = True
-            hand_hist = hand_histogram(frame)
 
         if is_hand_hist_created:
             manage_image_opr(frame, hand_hist, lmList)
@@ -276,9 +279,6 @@ def main():
                         f[i] = True
                     else:
                         f[i] = False
-
-        else:
-            frame = draw_rect(frame)
 
         cv2.imshow("Live Feed", rescale_frame(frame, wpercent, hpercent))
 
