@@ -138,7 +138,7 @@ def draw_circles(frame, traverse_point):
 def distance(x1,y1,x2,y2):
     return ((x1 - x2)**2 + (y1 - y2)**2)**0.5
 
-def manage_image_opr(frame, hand_hist):
+def manage_image_opr(frame, hand_hist, handPoints):
     global firstRun, prev_x, prev_y, f, lmb_start, rmb_start, scrUp_start, scrDown_start
     hist_mask_image = hist_masking(frame, hand_hist)
 
@@ -164,8 +164,14 @@ def manage_image_opr(frame, hand_hist):
         defects = cv2.convexityDefects(max_cont, hull)
         if(firstRun == True):
             firstRun = False
-            prev_x = cnt_centroid[0]
-            prev_y = cnt_centroid[1]
+            # prev_x = cnt_centroid[0]
+            # prev_y = cnt_centroid[1]
+            centerX = handPoints[0][1] + handPoints[1][1] + handPoints[17][1]
+            centerX /= 3
+            centerY = handPoints[0][2] + handPoints[1][2] + handPoints[17][2]
+            centerY /= 3
+            prev_x = centerX
+            prev_y = centerY
 
         if(f[1] == True):
             if(lmb_start == 0):
@@ -203,15 +209,26 @@ def manage_image_opr(frame, hand_hist):
         else:
             scrDown_start = 0
 
-        if(distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) < x_pad_lo
-            and (distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) > x_pad_lo / 50)):
-
-            prev_x = cnt_centroid[0]
-            prev_y = cnt_centroid[1]
-
-            mouse_x = cnt_centroid[0] - x_pad_lo
-            mouse_y = cnt_centroid[1] - y_pad_lo
-
+        # if(distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) < x_pad_lo
+        #     and (distance(cnt_centroid[0], cnt_centroid[1], prev_x, prev_y) > x_pad_lo / 50)):
+        #
+        #     prev_x = cnt_centroid[0]
+        #     prev_y = cnt_centroid[1]
+        #
+        #     mouse_x = cnt_centroid[0] - x_pad_lo
+        #     mouse_y = cnt_centroid[1] - y_pad_lo
+        #
+        #     mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)))
+        centerX = handPoints[0][1] + handPoints[1][1] + handPoints[17][1]
+        centerX /= 3
+        centerY = handPoints[0][2] + handPoints[1][2] + handPoints[17][2]
+        centerY /= 3
+        d = distance(centerX, centerY, prev_x, prev_y)
+        if x_pad_lo > d > x_pad_lo/50:
+            prev_x = centerX
+            prev_y = centerY
+            mouse_x = centerX - x_pad_lo
+            mouse_y = centerY - y_pad_lo
             mouse.move(mouse_x * (display_width / (x_pad_hi - x_pad_lo)), mouse_y * (display_height / (y_pad_hi - y_pad_lo)))
 
 
@@ -236,7 +253,7 @@ def main():
             hand_hist = hand_histogram(frame)
 
         if is_hand_hist_created:
-            manage_image_opr(frame, hand_hist)
+            manage_image_opr(frame, hand_hist, lmList)
             if len(lmList) != 0:
                 fingers = []
 
@@ -255,7 +272,7 @@ def main():
 
                 totalFingers = fingers.count(1)
                 for i in range(0,6):
-                    if(totalFingers == i):
+                    if totalFingers == i:
                         f[i] = True
                     else:
                         f[i] = False
